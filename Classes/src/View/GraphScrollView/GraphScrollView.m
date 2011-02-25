@@ -16,7 +16,6 @@
 - (void)createBackGroundViews:(CGRect)frame;
 - (CGRect)createChildFrame:(CGRect)frame;
 - (void)createScollViews:(CGRect)frame;
-- (void)scrollToIndex:(NSInteger)index animated:(BOOL)animated;
 - (void)graphAtIndex:(NSInteger)index toScrollView:(UIScrollView*)scrollView;
 - (void)showPreviousGraph;
 - (void)showNextGraph;
@@ -87,11 +86,6 @@
 	[self scrollToIndex:self.currentIndex animated:NO];
 }
 
-- (void)scrollToIndex:(NSInteger)index animated:(BOOL)animated {
-	CGPoint contentOffset = CGPointMake(index * self.backGroundView.frame.size.width, 0);
-	[self.backGroundView setContentOffset:contentOffset animated:animated];	
-}
-
 - (void)graphAtIndex:(NSInteger)index toScrollView:(UIScrollView*)scrollView {
 	if (scrollView && scrollView.subviews && scrollView.subviews.count > 0) {
 		UIView* subView = (UIView*)[scrollView.subviews objectAtIndex:0];
@@ -136,11 +130,6 @@
 #pragma mark -
 #pragma mark Public Methods
 
-- (void)adjustViews {
-	CGSize contentSize = CGSizeMake(self.currentView.frame.size.width*self.graphViews.count, self.currentView.frame.size.height);
-	self.backGroundView.contentSize = contentSize;
-}
-
 - (id)initWithFrame:(CGRect)frame graphViews:(NSArray*)graphViews {    
     if (self = [super initWithFrame:frame]) {
         // Initialization code.
@@ -148,6 +137,16 @@
 		[self createScollViews:frame];
     }
     return self;
+}
+
+- (void)adjustViews {
+	CGSize contentSize = CGSizeMake(self.currentView.frame.size.width*self.graphViews.count, self.currentView.frame.size.height);
+	self.backGroundView.contentSize = contentSize;
+}
+
+- (void)scrollToIndex:(NSInteger)index animated:(BOOL)animated {
+	CGPoint contentOffset = CGPointMake(index * self.backGroundView.frame.size.width, 0);
+	[self.backGroundView setContentOffset:contentOffset animated:animated];	
 }
 
 

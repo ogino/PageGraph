@@ -28,5 +28,6 @@
 
 - (id)initWithFrame:(CGRect)frame graphViews:(NSArray*)graphViews;
 - (void)adjustViews;
+- (void)scrollToIndex:(NSInteger)index animated:(BOOL)animated;
 
 @end

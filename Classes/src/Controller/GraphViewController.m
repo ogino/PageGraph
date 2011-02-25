@@ -88,35 +88,36 @@
 	return YES;
 }
 
-#define LANDSCAPE_PREVIOUS_FRAME CGRectMake(-1024, 0, 1024, 768)
-#define LANDSCAPE_SCROLL_FRAME CGRectMake(0, 0, 3072, 768)
-#define PORTLATE_PREVIOUS_FRAME CGRectMake(-768, 0, 768, 1024)
-#define PORTLATE_SCROLL_FRAME CGRectMake(0, 0, 2304, 1024)
+#define LANDSCAPE_FRAME CGRectMake(0, 0, 1024, 768)
+#define LANDSCAPE_SCROLL_FRAME CGRectMake(0, 0, 1024, 768)
+#define PORTLATE_FRAME CGRectMake(0, 0, 768, 1024)
+#define PORTLATE_SCROLL_FRAME CGRectMake(0, 0, 768, 1024)
 
 - (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
 	[super willRotateToInterfaceOrientation:toInterfaceOrientation duration:duration];
-	CGRect rect;
 	switch (toInterfaceOrientation) {
 		case UIInterfaceOrientationPortrait:
 		case UIInterfaceOrientationPortraitUpsideDown:
 			self.graphScrollView.backGroundView.frame = PORTLATE_SCROLL_FRAME;
-			self.graphScrollView.previousView.frame = PORTLATE_PREVIOUS_FRAME;
-			rect = PORTLATE_PREVIOUS_FRAME;
+			self.graphScrollView.previousView.frame = PORTLATE_FRAME;
 			break;
 		case UIInterfaceOrientationLandscapeLeft:
 		case UIInterfaceOrientationLandscapeRight:
 			self.graphScrollView.backGroundView.frame = LANDSCAPE_SCROLL_FRAME;
-			self.graphScrollView.previousView.bounds = LANDSCAPE_PREVIOUS_FRAME;
-			rect = LANDSCAPE_PREVIOUS_FRAME;
+			self.graphScrollView.previousView.bounds = LANDSCAPE_FRAME;
 			break;
 		default:
 			return;
 	}
+	CGRect rect = self.graphScrollView.previousView.frame;
+	rect.origin.x = (self.graphScrollView.currentIndex - 1) * rect.size.width;
+
 	rect.origin.x += rect.size.width;
 	self.graphScrollView.currentView.frame = rect;
 	rect.origin.x += rect.size.width;
 	self.graphScrollView.nextView.frame = rect;
 	[self.graphScrollView adjustViews];
+	[self.graphScrollView scrollToIndex:self.graphScrollView.currentIndex animated:NO];
 }
 
 - (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation {
