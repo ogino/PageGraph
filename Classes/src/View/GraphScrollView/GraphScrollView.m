@@ -12,8 +12,10 @@
 
 
 @interface GraphScrollView (PrivateDelegateHandling)
-- (UIScrollView*)createScrollView:(CGRect)frame graphView:(GraphView*)graphView;
 - (void)createBackGroundViews:(CGRect)frame;
+- (UIScrollView*)createScrollView:(CGRect)frame;
+- (NSArray*)createPlots:(NSInteger)minX maxX:(NSInteger)maxX;
+- (void)createChildViews:(CGRect)frame;
 - (CGRect)createChildFrame:(CGRect)frame;
 - (void)createScollViews:(CGRect)frame;
 - (void)graphAtIndex:(NSInteger)index toScrollView:(UIScrollView*)scrollView;
@@ -24,7 +26,6 @@
 
 @implementation GraphScrollView
 
-@synthesize graphViews = graphViews_;
 @synthesize backGroundView = backGroundView_;
 @synthesize currentView = currentView_;
 @synthesize nextView = nextView_;
@@ -35,22 +36,6 @@
 #pragma mark -
 #pragma mark Private Methods
 
-- (UIScrollView*)createScrollView:(CGRect)frame graphView:(GraphView*)graphView {
-	UIScrollView* scrollView = [[[UIScrollView alloc] initWithFrame:frame] autorelease];
-	scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight |
-	UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin| UIViewAutoresizingFlexibleTopMargin|
-	UIViewAutoresizingFlexibleBottomMargin;
-	scrollView.pagingEnabled = YES;
-	scrollView.scrollsToTop = NO;
-	scrollView.showsHorizontalScrollIndicator = NO;
-	scrollView.showsVerticalScrollIndicator = NO;
-	if (graphView) {
-		graphView.frame = scrollView.bounds;
-		[scrollView addSubview:graphView];
-	}
-	return scrollView;
-}
-
 - (void)createBackGroundView:(CGRect)frame {
 	self.backGroundView = [[[UIScrollView alloc] initWithFrame:frame] autorelease];
 	self.backGroundView.pagingEnabled = YES;
@@ -60,12 +45,36 @@
 	self.backGroundView.delegate = self;
 }
 
+- (UIScrollView*)createScrollView:(CGRect)frame {
+	UIScrollView* scrollView = [[[UIScrollView alloc] initWithFrame:frame] autorelease];
+	scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight |
+	UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin| UIViewAutoresizingFlexibleTopMargin|
+	UIViewAutoresizingFlexibleBottomMargin;
+	scrollView.pagingEnabled = YES;
+	scrollView.scrollsToTop = NO;
+	scrollView.showsHorizontalScrollIndicator = NO;
+	scrollView.showsVerticalScrollIndicator = NO;
+	return scrollView;
+}
+
+#define degreeToRadian(x) (M_PI * (x) / 180.0)
+
+- (NSArray*)createPlots:(NSInteger)minX maxX:(NSInteger)maxX {
+	NSMutableArray *contents = [NSMutableArray arrayWithCapacity:(maxX - minX)];
+	for (NSInteger i = minX; i < maxX; i++) {
+		id x = [NSNumber numberWithDouble:i];
+		id y = [NSNumber numberWithDouble:sin(degreeToRadian(i % 360))];
+		[contents addObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:x, @"x", y, @"y", nil]];
+	}
+	return contents;
+}
+
 - (void)createChildViews:(CGRect)frame {
-	self.previousView = [self createScrollView:frame graphView:nil];
+	self.previousView = [self createScrollView:frame];
 	frame.origin.x += frame.size.width;
-	self.currentView = [self createScrollView:frame graphView:(GraphView*)[self.graphViews objectAtIndex:0]];
+	self.currentView = [self createScrollView:frame];
 	frame.origin.x += frame.size.width;
-	self.nextView = [self createScrollView:frame graphView:(GraphView*)[self.graphViews objectAtIndex:1]];
+	self.nextView = [self createScrollView:frame];
 }
 
 - (CGRect)createChildFrame:(CGRect)frame {
@@ -79,6 +88,9 @@
 	CGRect rect = [self createChildFrame:frame];
 	[self createChildViews:rect];
 	[self createBackGroundView:frame];
+	[self graphAtIndex:self.currentIndex - 1 toScrollView:self.previousView];
+	[self graphAtIndex:self.currentIndex toScrollView:self.currentView];
+	[self graphAtIndex:self.currentIndex + 1 toScrollView:self.nextView];
 	[self.backGroundView addSubview:self.previousView];
 	[self.backGroundView addSubview:self.currentView];
 	[self.backGroundView addSubview:self.nextView];
@@ -86,16 +98,25 @@
 	[self scrollToIndex:self.currentIndex animated:NO];
 }
 
+#define EACH_XLENGTH 360
+#define MAX_PAGES 100
+
 - (void)graphAtIndex:(NSInteger)index toScrollView:(UIScrollView*)scrollView {
 	if (scrollView && scrollView.subviews && scrollView.subviews.count > 0) {
 		UIView* subView = (UIView*)[scrollView.subviews objectAtIndex:0];
-		if (subView) [subView removeFromSuperview];
+		if (subView) {
+			[subView removeFromSuperview];
+			subView = nil;
+		}
 	}
-	if (index < 0 || self.graphViews.count <= index) {
+	if (index < 0 || index > MAX_PAGES - 1) {
 		scrollView.delegate = nil;
 		return;
 	}
-	GraphView* graphView = (GraphView*)[self.graphViews objectAtIndex:index];
+	NSInteger xMin = EACH_XLENGTH * index;
+	NSInteger xMax = xMin + EACH_XLENGTH;
+	GraphScale* scale = [[[GraphScale alloc] initWithScale:xMin minYAxis:-1 maxXAxis:xMax maxYAxis:1] autorelease];
+	GraphView* graphView = [[[GraphView alloc] initWithFrame:CGRectZero plots:[self createPlots:xMin maxX:xMax] scale:scale] autorelease];
 	graphView.frame = scrollView.bounds;
 	[scrollView addSubview:graphView];
 }
@@ -130,17 +151,8 @@
 #pragma mark -
 #pragma mark Public Methods
 
-- (id)initWithFrame:(CGRect)frame graphViews:(NSArray*)graphViews {    
-    if (self = [super initWithFrame:frame]) {
-        // Initialization code.
-		self.graphViews = graphViews;
-		[self createScollViews:frame];
-    }
-    return self;
-}
-
 - (void)adjustViews {
-	CGSize contentSize = CGSizeMake(self.currentView.frame.size.width*self.graphViews.count, self.currentView.frame.size.height);
+	CGSize contentSize = CGSizeMake(self.currentView.frame.size.width * MAX_PAGES, self.currentView.frame.size.height);
 	self.backGroundView.contentSize = contentSize;
 }
 
@@ -178,7 +190,6 @@
 */
 
 - (void)dealloc {
-	self.graphViews = nil;
 	self.backGroundView = nil;
 	self.currentView = nil;
 	self.nextView = nil;

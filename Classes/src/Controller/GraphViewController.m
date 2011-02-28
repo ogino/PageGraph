@@ -12,8 +12,7 @@
 
 
 @interface GraphViewController (PrivateDelegateHandling)
-- (NSArray*)createGraphs:(NSInteger)minX maxX:(NSInteger)maxX;
-- (NSArray*)createPlots:(NSInteger)minX maxX:(NSInteger)maxX;
+
 @end
 
 
@@ -24,31 +23,6 @@
 
 #pragma mark -
 #pragma mark Private Methods
-
-#define GRAPH_XLENGTH 360
-
-- (NSArray*)createGraphs:(NSInteger)minX maxX:(NSInteger)maxX {
-	NSMutableArray* graphs = [NSMutableArray arrayWithCapacity:(maxX - minX)];
-	for (NSInteger i = minX; i < maxX; i += GRAPH_XLENGTH) {
-		NSInteger xLength = (i + GRAPH_XLENGTH) < maxX ? (i + GRAPH_XLENGTH) : maxX;
-		GraphScale* scale = [[[GraphScale alloc] initWithScale:i minYAxis:-1 maxXAxis:xLength maxYAxis:1] autorelease];
-		GraphView* view = [[[GraphView alloc] initWithFrame:CGRectZero plots:[self createPlots:i maxX:xLength] scale:scale] autorelease];
-		[graphs addObject:view];
-	}
-	return graphs;
-}
-
-#define degreeToRadian(x) (M_PI * (x) / 180.0)
-
-- (NSArray*)createPlots:(NSInteger)minX maxX:(NSInteger)maxX {
-	NSMutableArray *contents = [NSMutableArray arrayWithCapacity:(maxX - minX)];
-	for (NSInteger i = minX; i < maxX; i++) {
-		id x = [NSNumber numberWithDouble:i];
-		id y = [NSNumber numberWithDouble:sin(degreeToRadian(i % 360))];
-		[contents addObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:x, @"x", y, @"y", nil]];
-	}
-	return contents;
-}
 
 
 #pragma mark -
@@ -74,7 +48,7 @@
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
 - (void)viewDidLoad {
 	[super viewDidLoad];
-	self.graphScrollView = [[[GraphScrollView alloc] initWithFrame:self.view.bounds graphViews:[self createGraphs:0 maxX:36000]] autorelease];
+	self.graphScrollView = [[[GraphScrollView alloc] initWithFrame:self.view.bounds] autorelease];
 	[self.view addSubview:self.graphScrollView.backGroundView];
 }
 
