@@ -46,7 +46,7 @@
 #define MIN_XAXIS self.minXAxis
 #define MAX_XAXIS self.maxXAxis
 #define XAXIS_LENGTH (MAX_XAXIS - MIN_XAXIS)
-#define XAXIS_PADDING (XAXIS_LENGTH / 20)
+#define XAXIS_PADDING (XAXIS_LENGTH / 15)
 #define XAXIS_DISP_LENGTH (XAXIS_LENGTH + 2*XAXIS_PADDING)
 
 #define MIN_YAXIS self.minYAxis
@@ -110,7 +110,7 @@
 	[xAxis setTitle:@"degree(°)"];
 	[xAxis setVisibleRange:[CPPlotRange plotRangeWithLocation:CPDecimalFromFloat(MIN_XAXIS) length:CPDecimalFromFloat(XAXIS_LENGTH)]];
 
-	[xAxis setLabelTextStyle:[self createTextStyle:@"Georgia" color:[CPColor cyanColor]]];
+	[xAxis setLabelTextStyle:[self createTextStyle:@"Georgia" color:[CPColor orangeColor]]];
 	[xAxis setTitleTextStyle:[self createTextStyle:@"Georgia" color:[CPColor yellowColor] size:12.0f]];
 
 	xAxis.labelFormatter = [self createXFormatter];
@@ -124,7 +124,7 @@
 }
 
 #define YAXIS_INTERVAL @"0.2"
-#define YAXIS_ORTHOGONAL @"0.0"
+#define YAXIS_ORTHOGONAL [NSString stringWithFormat:@"%d", (NSInteger)MIN_XAXIS]
 
 - (void)createYAxis:(CPXYAxisSet*)axisSet {
 	CPXYAxis *yAxis = axisSet.yAxis;
@@ -135,7 +135,7 @@
 	[yAxis setTitle:@"sin(x) value"];
 	[yAxis setVisibleRange:[CPPlotRange plotRangeWithLocation:CPDecimalFromFloat(MIN_YAXIS) length:CPDecimalFromFloat(YAXIS_LENGTH)]];
 
-	[yAxis setLabelTextStyle:[self createTextStyle:@"Georgia" color:[CPColor cyanColor]]];
+	[yAxis setLabelTextStyle:[self createTextStyle:@"Georgia" color:[CPColor magentaColor]]];
 	[yAxis setTitleTextStyle:[self createTextStyle:@"Georgia" color:[CPColor yellowColor] size:12.0f]];
 
 	yAxis.labelFormatter = [self createYFormatter];
