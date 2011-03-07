@@ -42,12 +42,13 @@
 #pragma mark Private Methods
 
 #define NO_PADDING 0.0
+#define FIXED_PADDING -20.0
 
 #define MIN_XAXIS self.minXAxis
 #define MAX_XAXIS self.maxXAxis
 #define XAXIS_LENGTH (MAX_XAXIS - MIN_XAXIS)
-#define XAXIS_PADDING (XAXIS_LENGTH / 15)
-#define XAXIS_DISP_LENGTH (XAXIS_LENGTH + 2*XAXIS_PADDING)
+#define XAXIS_PADDING (XAXIS_LENGTH / 10)
+#define XAXIS_DISP_LENGTH (XAXIS_LENGTH + 1.5*XAXIS_PADDING)
 
 #define MIN_YAXIS self.minYAxis
 #define MAX_YAXIS self.maxYAxis
@@ -56,10 +57,10 @@
 #define YAXIS_DISP_LENGTH (YAXIS_LENGTH + 2*YAXIS_PADDING)
 
 - (void)initPadding {
-	self.graph.paddingLeft = NO_PADDING;
-	self.graph.paddingTop = NO_PADDING;
-	self.graph.paddingRight = NO_PADDING;
-	self.graph.paddingBottom = NO_PADDING;
+	self.graph.paddingLeft = FIXED_PADDING;
+	self.graph.paddingTop = FIXED_PADDING;
+	self.graph.paddingRight = FIXED_PADDING;
+	self.graph.paddingBottom = FIXED_PADDING;
 }
 
 - (void)createGraph {
