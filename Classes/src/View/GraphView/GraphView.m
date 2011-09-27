@@ -13,16 +13,17 @@
 - (void)initPadding;
 - (void)createGraph;
 - (void)createDrawArea:(BOOL)allowsUserInteraction;
-- (CPTextStyle*)createTextStyle:(NSString*)fontName color:(CPColor*)color;
-- (CPTextStyle*)createTextStyle:(NSString*)fontName color:(CPColor*)color size:(CGFloat)size;
+- (CPTMutableTextStyle*)createTextStyle:(NSString*)fontName color:(CPTColor*)color;
+- (CPTTextStyle*)createTextStyle:(NSString*)fontName color:(CPTColor*)color size:(CGFloat)size;
 - (NSNumberFormatter*)createXFormatter;
-- (void)createXAxis:(CPXYAxisSet*)axisSet;
+- (void)createXAxis:(CPTXYAxisSet*)axisSet;
 - (NSNumberFormatter*)createYFormatter;
-- (void)createYAxis:(CPXYAxisSet*)axisSet;
+- (void)createYAxis:(CPTXYAxisSet*)axisSet;
 - (void)createAxis;
-- (CPScatterPlot*)createScorePlot;
-- (CPFill*)createAreaFill;
-- (CPPlotSymbol*)createPlotSymbol;
+- (CPTLineStyle*)createLineStyle:(double)limit width:(double)width color:(CPTColor*)color;
+- (CPTScatterPlot*)createScorePlot;
+- (CPTFill*)createAreaFill;
+- (CPTPlotSymbol*)createPlotSymbol;
 - (CABasicAnimation*)createBlinkAnimation;
 - (void)createPlots;
 - (void)createGraphView;
@@ -64,29 +65,29 @@
 }
 
 - (void)createGraph {
-	self.graph = [[[CPXYGraph alloc] initWithFrame:CGRectZero] autorelease];
-	CPTheme *theme = [CPTheme themeNamed:kCPDarkGradientTheme];
+	self.graph = [[[CPTXYGraph alloc] initWithFrame:CGRectZero] autorelease];
+	CPTTheme *theme = [CPTTheme themeNamed:kCPTDarkGradientTheme];
 	[self.graph applyTheme:theme];
 	[self initPadding];
 }
 
 - (void)createDrawArea:(BOOL)allowsUserInteraction {
-	CPXYPlotSpace *plotSpace = (CPXYPlotSpace *)self.graph.defaultPlotSpace;
+	CPTXYPlotSpace *plotSpace = (CPTXYPlotSpace *)self.graph.defaultPlotSpace;
 	plotSpace.allowsUserInteraction = allowsUserInteraction;
 	// Set Display Range.
-	plotSpace.xRange = [CPPlotRange plotRangeWithLocation:CPDecimalFromFloat(MIN_XAXIS - XAXIS_PADDING) length:CPDecimalFromFloat(XAXIS_DISP_LENGTH)];
-	plotSpace.yRange = [CPPlotRange plotRangeWithLocation:CPDecimalFromFloat(MIN_YAXIS - YAXIS_PADDING) length:CPDecimalFromFloat(YAXIS_DISP_LENGTH)];
+	plotSpace.xRange = [CPTPlotRange plotRangeWithLocation:CPTDecimalFromFloat(MIN_XAXIS - XAXIS_PADDING) length:CPTDecimalFromFloat(XAXIS_DISP_LENGTH)];
+	plotSpace.yRange = [CPTPlotRange plotRangeWithLocation:CPTDecimalFromFloat(MIN_YAXIS - YAXIS_PADDING) length:CPTDecimalFromFloat(YAXIS_DISP_LENGTH)];
 }
 
-- (CPTextStyle*)createTextStyle:(NSString*)fontName color:(CPColor*)color {
-	CPTextStyle *textStyleX = [[[CPTextStyle alloc] init] autorelease];
+- (CPTMutableTextStyle*)createTextStyle:(NSString*)fontName color:(CPTColor*)color {
+	CPTMutableTextStyle *textStyleX = [[[CPTMutableTextStyle alloc] init] autorelease];
 	[textStyleX setFontName:fontName];
 	[textStyleX setColor:color];
 	return textStyleX;
 }
 
-- (CPTextStyle*)createTextStyle:(NSString*)fontName color:(CPColor*)color size:(CGFloat)size {
-	CPTextStyle *textStyleX = [self createTextStyle:fontName color:color];
+- (CPTTextStyle*)createTextStyle:(NSString*)fontName color:(CPTColor*)color size:(CGFloat)size {
+	CPTMutableTextStyle *textStyleX = [self createTextStyle:fontName color:color];
 	[textStyleX setFontSize:size];
 	return textStyleX;
 }
@@ -102,17 +103,17 @@
 #define XAXIS_INTERVAL @"30"
 #define XAXIS_ORTHOGONAL @"0.0"
 
-- (void)createXAxis:(CPXYAxisSet*)axisSet {
-	CPXYAxis *xAxis = axisSet.xAxis;
-	xAxis.majorIntervalLength = CPDecimalFromString(XAXIS_INTERVAL);
-	xAxis.orthogonalCoordinateDecimal = CPDecimalFromString(XAXIS_ORTHOGONAL);
+- (void)createXAxis:(CPTXYAxisSet*)axisSet {
+	CPTXYAxis *xAxis = axisSet.xAxis;
+	xAxis.majorIntervalLength = CPTDecimalFromString(XAXIS_INTERVAL);
+	xAxis.orthogonalCoordinateDecimal = CPTDecimalFromString(XAXIS_ORTHOGONAL);
 	xAxis.minorTicksPerInterval = 0.0f;
 
 	[xAxis setTitle:@"degree(°)"];
-	[xAxis setVisibleRange:[CPPlotRange plotRangeWithLocation:CPDecimalFromFloat(MIN_XAXIS) length:CPDecimalFromFloat(XAXIS_LENGTH)]];
+	[xAxis setVisibleRange:[CPTPlotRange plotRangeWithLocation:CPTDecimalFromFloat(MIN_XAXIS) length:CPTDecimalFromFloat(XAXIS_LENGTH)]];
 
-	[xAxis setLabelTextStyle:[self createTextStyle:@"Georgia" color:[CPColor orangeColor]]];
-	[xAxis setTitleTextStyle:[self createTextStyle:@"Georgia" color:[CPColor yellowColor] size:12.0f]];
+	[xAxis setLabelTextStyle:[self createTextStyle:@"Georgia" color:[CPTColor orangeColor]]];
+	[xAxis setTitleTextStyle:[self createTextStyle:@"Georgia" color:[CPTColor yellowColor] size:12.0f]];
 
 	xAxis.labelFormatter = [self createXFormatter];
 }
@@ -127,55 +128,60 @@
 #define YAXIS_INTERVAL @"0.2"
 #define YAXIS_ORTHOGONAL [NSString stringWithFormat:@"%d", (NSInteger)MIN_XAXIS]
 
-- (void)createYAxis:(CPXYAxisSet*)axisSet {
-	CPXYAxis *yAxis = axisSet.yAxis;
-	yAxis.majorIntervalLength = CPDecimalFromString(YAXIS_INTERVAL);
+- (void)createYAxis:(CPTXYAxisSet*)axisSet {
+	CPTXYAxis *yAxis = axisSet.yAxis;
+	yAxis.majorIntervalLength = CPTDecimalFromString(YAXIS_INTERVAL);
 	yAxis.minorTicksPerInterval = 0;
-	yAxis.orthogonalCoordinateDecimal = CPDecimalFromString(YAXIS_ORTHOGONAL);
+	yAxis.orthogonalCoordinateDecimal = CPTDecimalFromString(YAXIS_ORTHOGONAL);
 
 	[yAxis setTitle:@"sin(x) value"];
-	[yAxis setVisibleRange:[CPPlotRange plotRangeWithLocation:CPDecimalFromFloat(MIN_YAXIS) length:CPDecimalFromFloat(YAXIS_LENGTH)]];
+	[yAxis setVisibleRange:[CPTPlotRange plotRangeWithLocation:CPTDecimalFromFloat(MIN_YAXIS) length:CPTDecimalFromFloat(YAXIS_LENGTH)]];
 
-	[yAxis setLabelTextStyle:[self createTextStyle:@"Georgia" color:[CPColor magentaColor]]];
-	[yAxis setTitleTextStyle:[self createTextStyle:@"Georgia" color:[CPColor yellowColor] size:12.0f]];
+	[yAxis setLabelTextStyle:[self createTextStyle:@"Georgia" color:[CPTColor magentaColor]]];
+	[yAxis setTitleTextStyle:[self createTextStyle:@"Georgia" color:[CPTColor yellowColor] size:12.0f]];
 
 	yAxis.labelFormatter = [self createYFormatter];
 
 }
 
 - (void)createAxis {
-	CPXYAxisSet* axisSet = (CPXYAxisSet*)self.graph.axisSet;
+	CPTXYAxisSet* axisSet = (CPTXYAxisSet*)self.graph.axisSet;
 	[self createXAxis:axisSet];
 	[self createYAxis:axisSet];
 }
 
-- (CPScatterPlot*)createScorePlot {
-	CPScatterPlot *scorePlot = [[[CPScatterPlot alloc] init] autorelease];
+- (CPTLineStyle*)createLineStyle:(double)limit width:(double)width color:(CPTColor*)color {
+    CPTMutableLineStyle* lineStyle = [[[CPTMutableLineStyle alloc] init] autorelease];
+    lineStyle.miterLimit = limit;
+    lineStyle.lineWidth = width;
+    lineStyle.lineColor = color;
+    return lineStyle;
+}
+
+- (CPTScatterPlot*)createScorePlot {
+	CPTScatterPlot *scorePlot = [[[CPTScatterPlot alloc] init] autorelease];
 	scorePlot.identifier = @"Score Plot";
-	scorePlot.dataLineStyle.miterLimit = 1.0f;
-	scorePlot.dataLineStyle.lineWidth = 1.0f;
-	scorePlot.dataLineStyle.lineColor = [CPColor blueColor];
+    scorePlot.dataLineStyle = [self createLineStyle:1.0f width:1.0f color:[CPTColor blueColor]];
 	scorePlot.dataSource = self;
 	return scorePlot;
 }
 
-- (CPFill*)createAreaFill {
-	CPColor *areaColor = [CPColor colorWithComponentRed:0.3 green:0.3 blue:1.0 alpha:0.8];
-	CPGradient *areaGradient = [CPGradient gradientWithBeginningColor:areaColor endingColor:[CPColor clearColor]];
-	return [CPFill fillWithGradient:areaGradient];
+- (CPTFill*)createAreaFill {
+	CPTColor *areaColor = [CPTColor colorWithComponentRed:0.3 green:0.3 blue:1.0 alpha:0.8];
+	CPTGradient *areaGradient = [CPTGradient gradientWithBeginningColor:areaColor endingColor:[CPTColor clearColor]];
+	return [CPTFill fillWithGradient:areaGradient];
 }
 
-- (CPPlotSymbol*)createPlotSymbol {
-	CPLineStyle *symbolLineStyle = [CPLineStyle lineStyle];
-	symbolLineStyle.lineColor = [CPColor blackColor];
-	CPPlotSymbol *plotSymbol = [CPPlotSymbol ellipsePlotSymbol];
-	plotSymbol.fill = [CPFill fillWithColor:[CPColor blueColor]];
+- (CPTPlotSymbol*)createPlotSymbol {
+	CPTLineStyle *symbolLineStyle = [self createLineStyle:1.0f width:1.0f color:[CPTColor blackColor]];
+	CPTPlotSymbol *plotSymbol = [CPTPlotSymbol ellipsePlotSymbol];
+	plotSymbol.fill = [CPTFill fillWithColor:[CPTColor blueColor]];
 	plotSymbol.lineStyle = symbolLineStyle;
 	plotSymbol.size = CGSizeMake(10.0, 10.0);
 	return plotSymbol;
 }
 
-#define UNLIMITED_BLINK 1e100f
+#define UNLIMITED_BLINK HUGE_VALF
 
 - (CABasicAnimation*)createBlinkAnimation {
 	CABasicAnimation *fadeInAnimation = [CABasicAnimation animationWithKeyPath:@"opacity"];
@@ -205,7 +211,7 @@
 - (void)createGraphView {
 	[self createGraph];
 
-	CPGraphHostingView *hostingView = [[[CPGraphHostingView alloc] initWithFrame:self.bounds] autorelease];
+	CPTGraphHostingView *hostingView = [[[CPTGraphHostingView alloc] initWithFrame:self.bounds] autorelease];
 	hostingView.hostedGraph = self.graph;
 	hostingView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight |
 	UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin| UIViewAutoresizingFlexibleTopMargin|
@@ -216,7 +222,7 @@
 
 	[self createAxis];
 
-	CPScatterPlot *scorePlot = [self createScorePlot];
+	CPTScatterPlot *scorePlot = [self createScorePlot];
 	[self.graph addPlot:scorePlot];
 
 	scorePlot.areaFill = [self createAreaFill];
@@ -301,19 +307,19 @@
 #pragma mark -
 #pragma mark dataSource
 
--(NSUInteger)numberOfRecordsForPlot:(CPPlot *)plot {
+-(NSUInteger)numberOfRecordsForPlot:(CPTPlot*)plot {
 	return [self.plots count];
 }
 
--(NSNumber *)numberForPlot:(CPPlot *)plot field:(NSUInteger)fieldEnum recordIndex:(NSUInteger)index {
+-(NSNumber*)numberForPlot:(CPTPlot*)plot field:(NSUInteger)fieldEnum recordIndex:(NSUInteger)index {
 	NSNumber* number = nil;
 	NSDictionary* coord = [self.plots objectAtIndex:index];
 	if (coord != nil && [coord count] > 0 ) {
 		switch (fieldEnum) {
-			case CPScatterPlotFieldX:
+			case CPTScatterPlotFieldX:
 				number = [coord objectForKey:@"x"];
 				break;
-			case CPScatterPlotFieldY:
+			case CPTScatterPlotFieldY:
 				number = [coord objectForKey:@"y"];
 				break;
 		}

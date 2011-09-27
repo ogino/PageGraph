@@ -117,7 +117,8 @@
 	NSInteger xMax = xMin + EACH_XLENGTH;
 	GraphScale* scale = [[[GraphScale alloc] initWithScale:xMin minYAxis:-1 maxXAxis:xMax maxYAxis:1] autorelease];
 	GraphView* graphView = [[[GraphView alloc] initWithFrame:CGRectZero plots:[self createPlots:xMin maxX:xMax] scale:scale] autorelease];
-	graphView.frame = scrollView.bounds;
+	if (scrollView)
+        graphView.frame = scrollView.bounds;
 	[scrollView addSubview:graphView];
 }
 

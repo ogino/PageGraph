@@ -11,9 +11,9 @@
 #import "GraphScale.h"
 
 
-@interface GraphView : UIView<CPPlotDataSource> {
+@interface GraphView : UIView<CPTPlotDataSource> {
 @private
-	CPXYGraph* graph_;
+	CPTXYGraph* graph_;
 	NSArray* plots_;
 	CGFloat minXAxis_;
 	CGFloat minYAxis_;
@@ -21,7 +21,7 @@
 	CGFloat maxYAxis_;
 }
 
-@property (nonatomic, retain) CPXYGraph* graph;
+@property (nonatomic, retain) CPTXYGraph* graph;
 @property (nonatomic, retain) NSArray* plots;
 @property (nonatomic, assign) CGFloat minXAxis;
 @property (nonatomic, assign) CGFloat minYAxis;
